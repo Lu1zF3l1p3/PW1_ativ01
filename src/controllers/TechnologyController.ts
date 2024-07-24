@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { v4 as uuid } from "uuid";
 import { StatusCodes } from "http-status-codes";
-import { Technologie } from "../models/Technologie";
+import { Technology } from "../models/Technology";
 import { User } from "../models/User";
 
 interface BodyType {
@@ -10,12 +10,12 @@ interface BodyType {
     user: User;
 }
 
-export const TechnologieGet = (req: Request, res: Response) => {
+export const TechnologyGet = (req: Request, res: Response) => {
     const { user } = req.body as { user: User };
     res.status(StatusCodes.OK).json(user.technologies);
 };
 
-export const TechnologiePost = (req: Request, res: Response) => {
+export const TechnologyPost = (req: Request, res: Response) => {
     const { title, deadline, user } = req.body as BodyType;
 
     if (!title || !deadline) {
@@ -25,7 +25,7 @@ export const TechnologiePost = (req: Request, res: Response) => {
         return;
     }
 
-    const newTechnologie: Technologie = {
+    const newTechnology: Technology = {
         id: uuid(),
         title,
         studied: false,
@@ -33,11 +33,11 @@ export const TechnologiePost = (req: Request, res: Response) => {
         created_at: new Date(),
     };
 
-    user.technologies.push(newTechnologie);
-    res.status(StatusCodes.CREATED).json(newTechnologie);
+    user.technologies.push(newTechnology);
+    res.status(StatusCodes.CREATED).json(newTechnology);
 };
 
-export const TechnologiePut = (req: Request, res: Response) => {
+export const TechnologyPut = (req: Request, res: Response) => {
     const { title, deadline, user } = req.body as BodyType;
     const { id } = req.params as { id: string };
 
@@ -55,20 +55,24 @@ export const TechnologiePut = (req: Request, res: Response) => {
         return;
     }
 
-    user.technologies.map((technologie) => {
-        if (technologie.id === id) {
-            technologie.title = title;
-            technologie.deadline = new Date(deadline);
-            res.status(StatusCodes.OK).json(technologie);
+    let finded: boolean = false;
+    user.technologies.map((technology) => {
+        if (technology.id === id) {
+            technology.title = title;
+            technology.deadline = new Date(deadline);
+            finded = true;
+            res.status(StatusCodes.OK).json(technology);
             return;
         }
     });
-    res.status(StatusCodes.NOT_FOUND).json({
-        error: "Nenhuma tecnologia encontrada com o id: " + id,
-    });
+    if (!finded) {
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: "Nenhuma tecnologia encontrada com o id: " + id,
+        });
+    }
 };
 
-export const TechnologiePatch = (req: Request, res: Response) => {
+export const TechnologyPatch = (req: Request, res: Response) => {
     const { user } = req.body as BodyType;
     const { id } = req.params as { id: string };
 
@@ -79,19 +83,23 @@ export const TechnologiePatch = (req: Request, res: Response) => {
         return;
     }
 
-    user.technologies.map((technologie) => {
-        if (technologie.id === id) {
-            technologie.studied = true;
-            res.status(StatusCodes.OK).json(technologie);
+    let finded: boolean = false;
+    user.technologies.map((technology) => {
+        if (technology.id === id) {
+            technology.studied = true;
+            finded = true;
+            res.status(StatusCodes.OK).json(technology);
             return;
         }
     });
-    res.status(StatusCodes.NOT_FOUND).json({
-        error: "Nenhuma tecnologia encontrada com o id: " + id,
-    });
+    if (!finded) {
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: "Nenhuma tecnologia encontrada com o id: " + id,
+        });
+    }
 };
 
-export const TechnologieDelete = (req: Request, res: Response) => {
+export const TechnologyDelete = (req: Request, res: Response) => {
     const { user } = req.body as BodyType;
     const { id } = req.params as { id: string };
 
@@ -103,19 +111,19 @@ export const TechnologieDelete = (req: Request, res: Response) => {
     }
 
     let removed: boolean = false;
-    user.technologies = user.technologies.filter((technologie) => {
-        if (technologie.id === id) {
+    user.technologies = user.technologies.filter((technology) => {
+        if (technology.id === id) {
             removed = true;
             return;
         }
-        return technologie;
+        return technology;
     });
 
     if (removed) {
         res.status(StatusCodes.OK).json(user.technologies);
+    } else {
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: "Nenhuma tecnologia encontrada com o id: " + id,
+        });
     }
-
-    res.status(StatusCodes.NOT_FOUND).json({
-        error: "Nenhuma tecnologia encontrada com o id: " + id,
-    });
 };

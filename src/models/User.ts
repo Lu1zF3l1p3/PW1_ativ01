@@ -1,8 +1,8 @@
-import { Technologie } from "./Technologie";
+import { Technology } from "./Technology";
 
 export interface User {
     id: string;
     name: string;
     username: string;
-    technologies: Technologie[];
+    technologies: Technology[];
 }
